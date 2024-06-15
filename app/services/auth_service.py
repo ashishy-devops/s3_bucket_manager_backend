@@ -7,8 +7,11 @@ from app.core.database import get_db
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
+from app.core.config import SECRET_KEY
+import logging
 
-SECRET_KEY = ""
+logger = logging.getLogger(__name__)
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -27,6 +30,7 @@ def create_user(db: Session, user: UserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    logger.info("User created Successfully")
     return db_user
 
 def authenticate_user(db: Session, username: str, password: str):
@@ -45,6 +49,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    logger.info("token generated")
     return encoded_jwt
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):

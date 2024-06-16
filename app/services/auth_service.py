@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 3600
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

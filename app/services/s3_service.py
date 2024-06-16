@@ -4,7 +4,7 @@ from app.models.s3_credentials import S3Credentials
 from app.schemas import S3CredentialsCreate
 from fastapi import UploadFile, HTTPException
 
-def store_s3_credentials(credentials: S3CredentialsCreate, db: Session, user):
+def store_s3_credentials(db: Session, user, credentials: S3CredentialsCreate):
     db_credentials = S3Credentials(
         user_id=user.id,
         access_key_id=credentials.access_key_id,
@@ -36,7 +36,7 @@ def delete_s3_credentials(db: Session, user):
         return False
     
 def get_s3_client(db: Session, user):
-    db_credentials = db.query(S3Credentials).filter(S3Credentials.user_id == user.id)
+    db_credentials = db.query(S3Credentials).filter(S3Credentials.user_id == user.id).first()
     if db_credentials:
         return boto3.client(
             's3',

@@ -10,6 +10,7 @@ class UserLogin(BaseModel):
     password: str
     
 class S3CredentialsCreate(BaseModel):
+    user_id: int
     access_key_id: str
     secret_access_key: str
     

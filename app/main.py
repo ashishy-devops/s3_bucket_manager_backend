@@ -1,14 +1,17 @@
+# main.py
+
 from fastapi import FastAPI
 from app.api import auth, s3
-from app.models import user
-from app.core.database import engine
+from app.models import user, s3_credentials  # Correct import order
+from app.core.database import engine, get_db  # Import get_db for database access
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+# Create tables
 user.Base.metadata.create_all(bind=engine)
+s3_credentials.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

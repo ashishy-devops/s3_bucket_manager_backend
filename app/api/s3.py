@@ -44,5 +44,5 @@ def create_bucket(bucket: S3BucketCreate, db: Session = Depends(get_db), current
     return add_bucket(bucket.bucket_name, db, current_user)
 
 @router.delete("/buckets/{bucket_name}")
-def remove_bucket(bucket_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_bucket(bucket_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     return remove_bucket(bucket_name, db, current_user)

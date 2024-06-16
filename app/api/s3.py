@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from app.schemas import S3CredentialsCreate, S3BucketCreate
 from app.services.s3_service import (
     list_buckets, list_items, add_item, delete_item,
     store_s3_credentials, update_s3_credentials, delete_s3_credentials,
-    add_bucket, remove_bucket
+    add_bucket, remove_bucket, download_item
 )
 from app.services.auth_service import get_current_user
 from app.core.database import get_db
+import mimetypes
 
 router = APIRouter()
 
@@ -34,6 +36,18 @@ def get_items(bucket_name: str, db: Session = Depends(get_db), current_user = De
 @router.post("/buckets/{bucket_name}/items")
 def upload_item(bucket_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user), file: UploadFile = File(...)):
     return add_item(bucket_name, db, current_user, file)
+
+@router.get("/buckets/{bucket_name}/items/{item_name}")
+def download_item_route(bucket_name: str, item_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    file_stream = download_item(bucket_name, item_name, db, current_user)
+    if not file_stream:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    mime_type, _ = mimetypes.guess_type(item_name)
+    if mime_type is None:
+        mime_type = "application/octet-stream"
+    
+    return StreamingResponse(file_stream, media_type=mime_type, headers={"Content-Disposition": f"attachment; filename={item_name}"})
 
 @router.delete("/buckets/{bucket_name}/items/{item_name}")
 def remove_item(bucket_name: str, item_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):

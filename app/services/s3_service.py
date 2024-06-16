@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.s3_credentials import S3Credentials
 from app.schemas import S3CredentialsCreate
 from fastapi import UploadFile, HTTPException
+from io import BytesIO
 
 file_path="/Users/ashishyadav/abhishek-learning/"
 
@@ -75,6 +76,17 @@ def add_item(bucket_name: str, db: Session, user, file: UploadFile):
     else:
         return {"error": "Failed to upload file"}
     
+def download_item(bucket_name: str, item_name: str, db: Session, user):
+    client = get_s3_client(db, user)
+    if not client:
+        return None
+    try:
+        file_stream = BytesIO()
+        client.download_fileobj(bucket_name, item_name, file_stream)
+        file_stream.seek(0)
+        return file_stream
+    except Exception as e:
+        return None
 
 def delete_item(bucket_name: str, item_name: str, db: Session, user):
     client = get_s3_client(db, user)

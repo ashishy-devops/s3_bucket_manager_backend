@@ -4,6 +4,8 @@ from app.models.s3_credentials import S3Credentials
 from app.schemas import S3CredentialsCreate
 from fastapi import UploadFile, HTTPException
 
+file_path="/Users/ashishyadav/abhishek-learning/"
+
 def store_s3_credentials(db: Session, user, credentials: S3CredentialsCreate):
     db_credentials = S3Credentials(
         user_id=user.id,
@@ -65,11 +67,10 @@ def list_items(bucket_name: str, db: Session, user):
     else:
         return []
     
-def add_item(bucket_name: str, item_name: str, db: Session, user, file: UploadFile):
+def add_item(bucket_name: str, db: Session, user, file: UploadFile):
     client = get_s3_client(db, user)
     if client:
-        file_obj = file.file
-        client.put_object(Bucket=bucket_name, Key=item_name, Body=file_obj)
+        client.upload_fileobj(file.file, bucket_name, file.filename)
         return {"message": "File uploaded successfully"}
     else:
         return {"error": "Failed to upload file"}
@@ -78,7 +79,7 @@ def add_item(bucket_name: str, item_name: str, db: Session, user, file: UploadFi
 def delete_item(bucket_name: str, item_name: str, db: Session, user):
     client = get_s3_client(db, user)
     if client:
-        client.delete_object(bucket_name=bucket_name, Key=item_name)
+        client.delete_object(Bucket=bucket_name, Key=item_name)
         return {"message": "Item deleted Successfully"}
     else:
         return {"error": "Failed to delete item"}

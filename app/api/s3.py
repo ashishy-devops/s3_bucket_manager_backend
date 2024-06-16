@@ -32,8 +32,8 @@ def get_items(bucket_name: str, db: Session = Depends(get_db), current_user = De
     return list_items(bucket_name, db, current_user)
 
 @router.post("/bucekts/{bucekt_name}/items")
-def upload_item(bucket_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user), item_name: str, file: UploadFile = File(...)):
-    return add_item(bucket_name, db, current_user, item_name, file)
+def upload_item(bucket_name: str, item_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user), file: UploadFile = File(...)):
+    return add_item(bucket_name, item_name, db, current_user, file)
 
 @router.delete("/bucket/{bucket_name}/items/{item_name}")
 def delete_item(bucket_name: str, item_name: str, db: Session = Depends(get_db), current_user = Depends(get_current_user)):

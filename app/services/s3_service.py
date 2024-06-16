@@ -62,11 +62,11 @@ def list_items(bucket_name: str, db: Session, user):
     else:
         return []
     
-def add_item(bucket_name: str, db: Session, user, item_name: str, file: UploadFile):
+def add_item(bucket_name: str, item_name: str, db: Session, user, file: UploadFile):
     client = get_s3_client(db, user)
     if client:
         file_obj = file.file
-        client.put_object(Bucket=bucket_name, Key=item.item_name, Body=file_obj)
+        client.put_object(Bucket=bucket_name, Key=item_name, Body=file_obj)
         return {"message": "File uploaded successfully"}
     else:
         return {"error": "Failed to upload file"}

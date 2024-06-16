@@ -13,6 +13,5 @@ class S3CredentialsCreate(BaseModel):
     access_key_id: str
     secret_access_key: str
     
-class S3Item(BaseModel):
-    item_name: str
-    item_content: str
+class S3BucketCreate(BaseModel):
+    bucket_name: str

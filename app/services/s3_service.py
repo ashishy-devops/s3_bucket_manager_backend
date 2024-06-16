@@ -49,8 +49,11 @@ def get_s3_client(db: Session, user):
 def list_buckets(db: Session, user):
     client = get_s3_client(db, user)
     if client:
-        response = client.list_buckets()
-        return response.get('Buckets', [])
+        try:
+            response = client.list_buckets()
+            return response.get('Buckets', [])
+        except client.exceptions.ClientError:
+            raise HTTPException(status_code=403, detail="Invalid Credentials")
     else:
         return []
 

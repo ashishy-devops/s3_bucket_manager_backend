@@ -16,11 +16,11 @@ def add_s3_credentials(credentials: S3CredentialsCreate, db: Session = Depends(g
     return store_s3_credentials(db, current_user, credentials)
 
 @router.put("/credentials")
-def update_s3_credentials(credentials: S3CredentialsCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return update_s3_credentials(db, current_user, credentials)
+def put_s3_credentials(credentials: S3CredentialsCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    return update_s3_credentials(credentials, db, current_user)
 
 @router.delete("/credentials")
-def delete_s3_credentials(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def remove_s3_credentials(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     return delete_s3_credentials(db, current_user)
 
 @router.get("/buckets")

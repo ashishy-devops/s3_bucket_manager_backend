@@ -1,133 +1,154 @@
 # FastAPI AWS S3 Service
 
-Welcome to the FastAPI AWS S3 Service project! This project provides a backend API built with FastAPI for managing AWS S3 buckets and objects, along with user authentication via Okta.
-
-## Table of Contents
-
-- [Features](#features)
-- [Folder Structure](#folder-structure)
-- [Setup](#setup)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-  - [Running the Server](#running-the-server)
-  - [Endpoints](#endpoints)
-- [Environment Variables](#environment-variables)
-- [Contributing](#contributing)
-- [License](#license)
+This project is a FastAPI-based backend service that integrates with AWS S3 to manage files. Users can authenticate, store their AWS credentials, and perform CRUD operations on S3 buckets and objects.
 
 ## Features
 
-- **Authentication**: User authentication using Okta.
-- **AWS S3 Operations**: CRUD operations for managing S3 buckets and objects.
-- **Modular Structure**: Organized codebase using `APIRouter` for separation of concerns.
-- **Environment-based Configuration**: Configuration via `.env` file for sensitive information.
+- User authentication using OAuth2 with password flow.
+- Store and manage AWS S3 credentials securely.
+- List, upload, download, and delete files in S3 buckets.
+- Create and delete S3 buckets.
 
-## Folder Structure
+## Table of Contents
 
-```
-my_fastapi_project/
-├── app/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── models/
-│   │   └── __init__.py
-│   ├── schemas/
-│   │   └── __init__.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── auth.py
-│   │   ├── s3.py
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── auth_service.py
-│   │   ├── s3_service.py
-│   ├── core/
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   └── utils/
-│       └── __init__.py
-├── .env
-├── requirements.txt
-└── README.md
-```
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Authentication](#authentication)
+  - [S3 Credentials](#s3-credentials)
+  - [S3 Bucket Operations](#s3-bucket-operations)
+  - [S3 Item Operations](#s3-item-operations)
+- [API Endpoints](#api-endpoints)
+- [Database Initialization](#database-initialization)
+- [Notes](#notes)
+- [License](#license)
 
-## Setup
+## Installation
 
 ### Prerequisites
 
-- Python 3.7+
-- `pip` package manager
-- AWS account with S3 access credentials
-- Okta developer account (for authentication)
+- Python 3.8+
+- AWS Account with S3 permissions
 
-### Installation
+### Setup
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/yourusername/my_fastapi_project.git
-   cd my_fastapi_project
-   ```
+    ```bash
+    git clone https://github.com/yourusername/s3_bucket_manager.git
+    cd s3_bucket_manager/s3_bucket_manager_backend
+    ```
 
 2. Create and activate a virtual environment:
 
-   ```bash
-   python -m venv venv
-   # On macOS/Linux:
-   source venv/bin/activate
-   # On Windows:
-   venv\Scripts\activate
-   ```
+    ```bash
+    python -m venv env
+    source env/bin/activate  # On Windows use `env\Scripts\activate`
+    ```
 
-3. Install dependencies:
+3. Install the dependencies:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4. Run the FastAPI application:
+
+    ```bash
+    uvicorn main:app --reload
+    ```
+
+    The application will be available at `http://127.0.0.1:8000`.
 
 ## Usage
 
-### Running the Server
+### Authentication
 
-Run the FastAPI server with Uvicorn:
+1. **Sign Up**:
+    ```bash
+    curl -X POST "http://127.0.0.1:8000/auth/register" -H "Content-Type: application/json" -d '{"username": "testuser", "password": "testpassword"}'
+    ```
+
+2. **Login**:
+    ```bash
+    curl -X POST "http://127.0.0.1:8000/auth/login" -H "Content-Type: application/json" -d '{"username": "testuser", "password": "testpassword"}'
+    ```
+
+    The response will include a JWT token.
+
+### S3 Credentials
 
 ```bash
-uvicorn app.main:app --reload
+curl -X PUT "http://127.0.0.1:8000/s3/credentials" -H "Authorization: Bearer <token>" -H "Content-Type: application/json" -d '{"access_key_id": "<your_access_key_id>", "secret_access_key": "<your_secret_access_key>"}'
 ```
 
-The server will start at `http://localhost:8000`.
+### S3 Bucket Operations
 
-### Endpoints
-
-- **Authentication**:
-  - `POST /auth/login`: Authenticate a user with Okta.
-  - `POST /auth/logout`: Log out a user.
-
-- **AWS S3 Operations**:
-  - `POST /s3/credentials`: Store AWS S3 credentials.
-  - `PUT /s3/credentials`: Update AWS S3 credentials.
-  - `DELETE /s3/credentials`: Delete AWS S3 credentials.
-  - `GET /s3/buckets`: List all S3 buckets.
-  - `GET /s3/buckets/{bucket_name}`: List items in a specific S3 bucket.
-  - `POST /s3/buckets/{bucket_name}/items`: Add an item to a specific S3 bucket.
-  - `DELETE /s3/buckets/{bucket_name}/items/{item_name}`: Delete an item from a specific S3 bucket.
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following environment variables:
-
-```
-OKTA_CLIENT_ID=your_okta_client_id
-OKTA_CLIENT_SECRET=your_okta_client_secret
-AWS_ACCESS_KEY_ID=your_aws_access_key_id
-AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+**Create a Bucket**
+```bash
+curl -X POST "http://127.0.0.1:8000/s3/buckets/mybucket" -H "Authorization: Bearer <token>"
 ```
 
-## Contributing
+**Delete a Bucket**
+```bash
+curl -X DELETE "http://127.0.0.1:8000/s3/buckets/mybucket" -H "Authorization: Bearer <token>"
+```
 
-Contributions are welcome! Fork the repository and submit a pull request with your changes.
+### S3 Item Operations
+
+**List Items in a Bucket**
+```bash
+curl -X GET "http://127.0.0.1:8000/s3/buckets/mybucket/items" -H "Authorization: Bearer <token>"
+```
+
+**Upload a File**
+```bash
+curl -X POST "http://127.0.0.1:8000/s3/buckets/mybucket/items" -H "Authorization: Bearer <token>" -F "file=@/path/to/your/file"
+```
+
+**Download a File**
+```bash
+curl -X GET "http://127.0.0.1:8000/s3/buckets/mybucket/items/myfile.txt" -H "Authorization: Bearer <token>" -O
+```
+
+**Delete a File**
+```bash
+curl -X DELETE "http://127.0.0.1:8000/s3/buckets/mybucket/items/myfile.txt" -H "Authorization: Bearer <token>"
+```
+
+## API Endpoints
+
+### Authentication
+
+- **POST /auth/register**: Register a new user.
+- **POST /auth/login**: Authenticate and get a token.
+
+### S3 Credentials
+
+- **PUT /s3/credentials**: Store AWS S3 credentials.
+
+### S3 Bucket Operations
+
+- **POST /s3/buckets/{bucket_name}**: Create a new S3 bucket.
+- **DELETE /s3/buckets/{bucket_name}**: Delete an existing S3 bucket.
+
+### S3 Item Operations
+
+- **GET /s3/buckets/{bucket_name}/items**: List items in a bucket.
+- **POST /s3/buckets/{bucket_name}/items**: Upload a file to a bucket.
+- **DELETE /s3/buckets/{bucket_name}/items/{item_name}**: Delete a file from a bucket.
+- **GET /s3/buckets/{bucket_name}/items/{item_name}**: Download a file from a bucket.
+
+## Database Initialization
+
+Ensure the database tables are created by running the application. The database file (`test.db`) will be created in the project directory.
+
+## Notes
+
+- Replace `<token>` with the JWT token obtained from the login endpoint.
+- Replace `mybucket` with your bucket name and `myfile.txt` with your file name.
+- The project uses SQLite for development. For production, consider using a more robust database like PostgreSQL or MySQL.
+- For enabling foreign key constraints in SQLite, ensure `PRAGMA foreign_keys = ON` is set.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
